@@ -15,13 +15,12 @@ if (!defined('ABSPATH')) {
 if (defined('WP_INSTALLING') && WP_INSTALLING)
     return;
 
-$rps_server = '127.0.0.1';
-$rps_port = 6379;
+$rps_server = defined("WP_REDIS_HOST") ? WP_REDIS_HOST : '127.0.0.1';
+$rps_port = defined("WP_REDIS_PORT") ? WP_REDIS_PORT : '6379';
 $rps_ttl = 3600;
 $rps_ttl = 600;
 $rps_compress = true;
-$rps_minify = true;
-$rps_minify = true;
+$rps_minify = false;
 $Redis = new \Redis();
 $is_redis_connected = $Redis->connect($rps_server,$rps_port);
 if($is_redis_connected && !is_admin()) {

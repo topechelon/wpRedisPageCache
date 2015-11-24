@@ -29,8 +29,6 @@ class MinifyConverter implements Converter {
       '~([\r\n\t ])?([a-zA-Z0-9]+)="([a-zA-Z0-9_/\\-]+)"([\r\n\t ])?~s' => '$1$2=$3$4', //$1 and $4 insert first white-space character found before/after attribute
     );
     return preg_replace(array_keys($replace), array_values($replace), $html);
-
   }
-
 }
 ?>
