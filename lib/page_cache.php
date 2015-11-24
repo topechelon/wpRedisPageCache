@@ -1,10 +1,10 @@
 <?php
 namespace RedisPageCache;
 class PageCache {
+  const PRE_CACHE = 0;
+  const POST_CACHE = 0;
   protected $Cache = null;
-  protected $PreConverters = array();
-  protected $PostConverters = array();
-  protected $headers = array();
+  protected $Converters = array();
   function __construct($Cache) {
     $this->Cache = $Cache;
   }
@@ -14,55 +14,44 @@ class PageCache {
   function getHash() {
     return $this->hash;
   }
-  function addPreConverter(Converter $Converter) {
-    $this->PreConverters[] = $Converter;
-  }
-  function addPostConverter(Converter $Converter) {
-    $this->PostConverters[] = $Converter;
-  }
-  function addHeader($header) {
-    $this->headers[] = $header;
+  function addConverter(Converter $Converter,$WHEN = self::PRE_CACHE) {
+    $this->Converters[$WHEN][] = $Converter;
   }
   function start_capture() {
     ob_start(array($this,"ob_callback"));
   }
   function ob_callback($content) {
     $hash = $this->getHash();
-    $content = $this->processPreConverters($content);
-    $this->Cache->log("set hash: $hash");
-    $this->Cache->set($hash,$content);
+    $converted_content = $this->processConverters($content,self::PRE_CACHE);
+    //$this->Cache->log("set hash: $hash");
+    $response_headers = headers_list();
+    $save = array("headers" => $response_headers,
+                  "content" => $converted_content);
+    $this->Cache->set($hash,$save);
     return $content;
   }
   function check_cache() {
     $hash = $this->getHash();
     if($this->Cache->has($hash)) {
-      $this->Cache->log("found hash: $hash");
-      $html = $this->Cache->get($hash);
-      $this->processHeaders();
-      $html = $this->processPostConverters($html);
+      //$this->Cache->log("found hash: $hash");
+      $cache = $this->Cache->get($hash);
+      $this->processHeaders($cache['headers']);
+      $html = $this->processConverters($cache['content'],self::POST_CACHE);
       echo $html;
       exit;
     }
   }
-  protected function processPreConverters($content) {
-    if(count($this->PreConverters) > 0) {
-      foreach($this->PreConverters as $Converter) {
+  protected function processConverters($content,$WHEN) {
+    if(isset($this->Converters[$WHEN]) && count($this->Converters[$WHEN]) > 0) {
+      foreach($this->Converters[$WHEN] as $Converter) {
         $content = $Converter->convert($content);
       }
     }
     return $content;
   }
-  protected function processPostConverters($content) {
-    if(count($this->PostConverters) > 0) {
-      foreach($this->PostConverters as $Converter) {
-        $content = $Converter->convert($content);
-      }
-    }
-    return $content;
-  }
-  protected function processHeaders() {
-    if(count($this->headers) > 0) {
-      foreach ($this->headers as $header){
+  protected function processHeaders($headers) {
+    if(count($headers) > 0) {
+      foreach ($headers as $header){
         header($header);
       }
     }

@@ -19,6 +19,9 @@ $rps_server = '127.0.0.1';
 $rps_port = 6379;
 $rps_ttl = 3600;
 $rps_ttl = 600;
+$rps_compress = true;
+$rps_minify = true;
+$rps_minify = true;
 $Redis = new \Redis();
 $is_redis_connected = $Redis->connect($rps_server,$rps_port);
 if($is_redis_connected && !is_admin()) {
@@ -26,13 +29,11 @@ if($is_redis_connected && !is_admin()) {
   require "lib/page_cache.php";
   require "lib/converter_interface.php";
   require "lib/minify_converter.php";
-  require "lib/compression_converters.php";
-  $RedisCache = new RedisCache($Redis,$rps_ttl);
-  $RedisPageCache = new PageCache($RedisCache,$rps_ttl);
-  $RedisPageCache->addHeader("Content-Type: text/html; charset=UTF-8");
-  $RedisPageCache->addPreConverter(new MinifyConverter());
-  $RedisPageCache->addPreConverter(new CompressConverter());
-  $RedisPageCache->addPostConverter(new UnCompressConverter());
+  $RedisCache = new RedisCache($Redis,$rps_ttl,$rps_compress);
+  $RedisPageCache = new PageCache($RedisCache);
+  if ($rps_minify) {
+    $RedisPageCache->addConverter(new MinifyConverter());
+  }
   $key = sha1($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
   $RedisPageCache->setHash($key);
   add_action("plugins_loaded",array($RedisPageCache,"check_cache"));
