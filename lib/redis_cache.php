@@ -39,4 +39,7 @@ class RedisCache {
     }
     return $this->Redis->setEx($key,$this->ttl,$value);
   }
+  function delete($key) {
+    return $this->Redis->delete($key);
+  }
 }

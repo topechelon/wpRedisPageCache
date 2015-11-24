@@ -20,19 +20,27 @@ class PageCache {
   function start_capture() {
     ob_start(array($this,"ob_callback"));
   }
+  function clear_post($post_id) {
+    $url = get_permalink($post_id);
+    $hash = sha1(str_replace(array("http://","https://"),"",$url));
+    //$this->Cache->log("clear hash: $hash");
+    $this->Cache->delete($hash);
+  }
   function ob_callback($content) {
     $hash = $this->getHash();
-    $converted_content = $this->processConverters($content,self::PRE_CACHE);
-    //$this->Cache->log("set hash: $hash");
-    $response_headers = headers_list();
-    $save = array("headers" => $response_headers,
-                  "content" => $converted_content);
-    $this->Cache->set($hash,$save);
+    if(!is_user_logged_in()) {
+      $converted_content = $this->processConverters($content,self::PRE_CACHE);
+      //$this->Cache->log("set hash: $hash");
+      $response_headers = headers_list();
+      $save = array("headers" => $response_headers,
+                    "content" => $converted_content);
+      $this->Cache->set($hash,$save);
+    }
     return $content;
   }
   function check_cache() {
     $hash = $this->getHash();
-    if($this->Cache->has($hash)) {
+    if(!is_user_logged_in() && $this->Cache->has($hash)) {
       //$this->Cache->log("found hash: $hash");
       $cache = $this->Cache->get($hash);
       $this->processHeaders($cache['headers']);

@@ -21,10 +21,9 @@ $rps_ttl = 3600;
 $rps_ttl = 600;
 $rps_compress = true;
 $rps_minify = false;
-$is_normal_page = !is_admin() && !is_user_logged_in();
 $Redis = new \Redis();
 $is_redis_connected = $Redis->connect($rps_server,$rps_port);
-if($is_redis_connected && $is_normal_page) {
+if($is_redis_connected) {
   require "lib/redis_cache.php";
   require "lib/page_cache.php";
   require "lib/converter_interface.php";
@@ -34,8 +33,14 @@ if($is_redis_connected && $is_normal_page) {
   if ($rps_minify) {
     $RedisPageCache->addConverter(new MinifyConverter());
   }
-  $key = sha1($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+  $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+  $key = sha1($uri);
   $RedisPageCache->setHash($key);
-  add_action("plugins_loaded",array($RedisPageCache,"check_cache"));
-  add_action("wp_loaded",array($RedisPageCache,"start_capture"));
+  if(is_admin()) {
+    add_action("save_post",array($RedisPageCache,"clear_post"));
+  } else {
+    add_action("plugins_loaded",array($RedisPageCache,"check_cache"));
+    add_action("wp_loaded",array($RedisPageCache,"start_capture"));
+
+  }
 }
