@@ -21,9 +21,10 @@ $rps_ttl = 3600;
 $rps_ttl = 600;
 $rps_compress = true;
 $rps_minify = false;
+$is_normal_page = !is_admin() && !is_user_logged_in();
 $Redis = new \Redis();
 $is_redis_connected = $Redis->connect($rps_server,$rps_port);
-if($is_redis_connected && !is_admin()) {
+if($is_redis_connected && $is_normal_page) {
   require "lib/redis_cache.php";
   require "lib/page_cache.php";
   require "lib/converter_interface.php";
