@@ -1,7 +1,15 @@
 <?php
 namespace RedisPageCache;
-class MinifyConverter implements Converter {
-  function convert($html) {
+class MinifyCacheDecorator extends CacheDecorator {
+  function set($key,$value) {
+    if(isset($value['content'])) {
+      $value['content'] = $this->minify($value['content']);
+    } else {
+      $value = $this->minify($value);
+    }
+    return $this->Cache->set($key,$value);
+  }
+  private function minify($content) {
     $replace = array(
       //remove tabs before and after HTML tags
       '/\>[^\S ]+/s'   => '>',
@@ -28,7 +36,6 @@ class MinifyConverter implements Converter {
       //remove quotes from HTML attributes that does not contain spaces; keep quotes around URLs!
       '~([\r\n\t ])?([a-zA-Z0-9]+)="([a-zA-Z0-9_/\\-]+)"([\r\n\t ])?~s' => '$1$2=$3$4', //$1 and $4 insert first white-space character found before/after attribute
     );
-    return preg_replace(array_keys($replace), array_values($replace), $html);
+    return preg_replace(array_keys($replace), array_values($replace), $content);
   }
 }
-?>
