@@ -24,11 +24,19 @@ $rps_minify = false;
 $Redis = new \Redis();
 $is_redis_connected = $Redis->connect($rps_server,$rps_port);
 if($is_redis_connected) {
+  require "lib/cache.php";
   require "lib/redis_cache.php";
+  require "lib/cache_decorator.php";
+  require "lib/compression_cache_decorator.php";
+  require "lib/json_cache_decorator.php";
   require "lib/page_cache.php";
   require "lib/converter_interface.php";
   require "lib/minify_converter.php";
-  $RedisCache = new RedisCache($Redis,$rps_ttl,$rps_compress);
+  $RedisCache = new RedisCache($Redis,$rps_ttl);
+  if($rps_compress) {
+    $RedisCache = new CompressionCacheDecorator($RedisCache);
+  }
+  $RedisCache = new JsonCacheDecorator($RedisCache);
   $RedisPageCache = new PageCache($RedisCache);
   if ($rps_minify) {
     $RedisPageCache->addConverter(new MinifyConverter());
