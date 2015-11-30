@@ -20,10 +20,12 @@ if(!empty($settings)) {
   $rps_server = $settings['host'];
   $rps_port = $settings['port'];
   $rps_ttl = $settings['ttl'];
+  $rps_db = $settings['db'];
   $rps_compress = true;
   $rps_minify = true;
   $Redis = new \Redis();
   $is_redis_connected = $Redis->connect($rps_server,$rps_port,1);
+  $Redis->select($rps_db);
 } else {
   $is_redis_connected = false;
 }

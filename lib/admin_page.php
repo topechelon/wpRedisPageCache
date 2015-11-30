@@ -25,6 +25,11 @@ class AdminPage {
                        array($this,'getOptionPortHTML'),
                        'redis-page-cache',
                        'redis_page_cache_connect_fields');
+    add_settings_field('redis_page_cache_db',
+                       'Regis DB',
+                       array($this,'getOptionDbHTML'),
+                       'redis-page-cache',
+                       'redis_page_cache_connect_fields');
     add_settings_field('redis_page_cache_ttl',
                        'Time To Live',
                        array($this,'getOptionTtlHTML'),
@@ -71,6 +76,11 @@ class AdminPage {
     $settings = \get_option('redis_page_cache_connect');
     $port = !empty($settings['port']) ? $settings['port'] : '6379';
     echo "<input type='text' name='redis_page_cache_connect[port]' value='$port'>";
+  }
+  function getOptionDbHTML() {
+    $settings = \get_option('redis_page_cache_connect');
+    $db = !empty($settings['db']) ? $settings['db'] : '0';
+    echo "<input type='text' name='redis_page_cache_connect[db]' value='$db'>";
   }
   function getOptionTtlHTML() {
     $settings = \get_option('redis_page_cache_connect');
