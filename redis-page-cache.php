@@ -15,14 +15,23 @@ if (!defined('ABSPATH')) {
 if (defined('WP_INSTALLING') && WP_INSTALLING)
     return;
 
-$rps_server = defined("WP_REDIS_HOST") ? WP_REDIS_HOST : '127.0.0.1';
-$rps_port = defined("WP_REDIS_PORT") ? WP_REDIS_PORT : '6379';
-$rps_ttl = 3600;
-$rps_ttl = 600;
-$rps_compress = true;
-$rps_minify = true;
-$Redis = new \Redis();
-$is_redis_connected = $Redis->connect($rps_server,$rps_port);
+$settings = \get_option('redis_page_cache_connect');
+if(!empty($settings)) {
+  $rps_server = $settings['host'];
+  $rps_port = $settings['port'];
+  $rps_ttl = $settings['ttl'];
+  $rps_compress = true;
+  $rps_minify = true;
+  $Redis = new \Redis();
+  $is_redis_connected = $Redis->connect($rps_server,$rps_port,1);
+} else {
+  $is_redis_connected = false;
+}
+if(is_admin()) {
+  require "lib/admin_page.php";
+  $AdminPage = new AdminPage($is_redis_connected);
+  $AdminPage->init();
+}
 if($is_redis_connected) {
   require "lib/cache.php";
   require "lib/redis_cache.php";
