@@ -16,8 +16,6 @@ if (defined('WP_INSTALLING') && WP_INSTALLING)
     return;
 
 require "lib/load.php";
-if($is_redis_connected) {
-  if(is_admin()) {
-    add_action("save_post",array($RedisPageCache,"clear_post"));
-  }
+if($is_redis_connected && is_admin()) {
+  add_action("save_post",array($RedisPageCache,"clear_post"));
 }
