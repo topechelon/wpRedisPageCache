@@ -25,7 +25,9 @@ if(!empty($settings)) {
   $rps_minify = true;
   $Redis = new \Redis();
   $is_redis_connected = $Redis->connect($rps_server,$rps_port,1);
-  $Redis->select($rps_db);
+  if($is_redis_connected) {
+    $Redis->select($rps_db);
+  }
 } else {
   $is_redis_connected = false;
 }
