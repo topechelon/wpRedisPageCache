@@ -7,6 +7,7 @@ Version: 0.7
 Plugin URI: 
 Author: Michael McHolm
 Author URI: 
+Network: True
 */
 
 if (!defined('ABSPATH')) {
@@ -14,8 +15,22 @@ if (!defined('ABSPATH')) {
 }
 if (defined('WP_INSTALLING') && WP_INSTALLING)
     return;
-
-require "lib/load.php";
+if(empty($RedisPageCache)) {
+  require "lib/load.php";
+}
 if($is_redis_connected && is_admin()) {
   add_action("save_post",array($RedisPageCache,"clear_post"));
 }
+\register_activation_hook(__FILE__,function() {
+  $target = WP_CONTENT_DIR . "/plugins/redis-page-cache/advanced-cache.php";
+  $link = WP_CONTENT_DIR . "/advanced-cache.php";
+  if(!file_exists($link) && file_exists($target)) {
+    @symlink($target,$link);
+  }
+});
+\register_deactivation_hook(__FILE__,function() {
+  $link = WP_CONTENT_DIR . "/advanced-cache.php";
+  if(file_exists($link)) {
+    @unlink($link);
+  }
+});

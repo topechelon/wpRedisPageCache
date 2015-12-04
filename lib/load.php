@@ -35,11 +35,3 @@ if($is_redis_connected) {
   }
   $RedisPageCache = new PageCache($RedisCache);
 }
-$cookie_keys = array_keys($_COOKIE);
-$is_logged_in = false;
-foreach($cookie_keys as $cookie_key) {
-  if(preg_match("/^wordpress_logged_in_/",$cookie_key) > 0) {
-    $is_logged_in = true;
-    break;
-  }
-}
