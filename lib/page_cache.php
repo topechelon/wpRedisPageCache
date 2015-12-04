@@ -23,7 +23,7 @@ class PageCache {
   }
   function ob_callback($content) {
     $hash = $this->getHash();
-    if(!is_user_logged_in() && !$this->is_excluded_script()) {
+    if(!is_user_logged_in() && !$this->isExcludedScript()) {
       //$this->Cache->log("set hash: $hash");
       $response_headers = headers_list();
       $save = array("headers" => $response_headers,
@@ -34,13 +34,14 @@ class PageCache {
   }
   function check_cache() {
     $hash = $this->getHash();
-    if(!is_user_logged_in() && !$this->is_excluded_script() && $this->Cache->has($hash)) {
+    if(!$this->isExcludedScript() && $this->Cache->has($hash)) {
       //$this->Cache->log("found hash: $hash");
       $cache = $this->Cache->get($hash);
       $this->processHeaders($cache['headers']);
       echo $cache['content'];
-      exit;
+      return true;
     }
+    return false;
   }
   protected function processHeaders($headers) {
     if(count($headers) > 0) {
@@ -49,7 +50,7 @@ class PageCache {
       }
     }
   }
-  protected function is_excluded_script() {
+  protected function isExcludedScript() {
     $script = $_SERVER['SCRIPT_NAME'];
     return in_array($script,$this->excluded_scripts);
   }
