@@ -18,13 +18,14 @@ $is_redis_connected = $Redis->connect(REDIS_PAGE_CACHE_HOST,REDIS_PAGE_CACHE_POR
 if($is_redis_connected) {
   $Redis->select(REDIS_PAGE_CACHE_DB);
   if(!class_exists('RedisPageCache\Cache')) {
-    require "cache.php";
-    require "redis_cache.php";
-    require "cache_decorator.php";
-    require "compression_cache_decorator.php";
-    require "json_cache_decorator.php";
-    require "minify_cache_decorator.php";
-    require "page_cache.php";
+    $redis_page_cache_dir = dirname(__FILE__);
+    require $redis_page_cache_dir . "/cache.php";
+    require $redis_page_cache_dir . "/redis_cache.php";
+    require $redis_page_cache_dir . "/cache_decorator.php";
+    require $redis_page_cache_dir . "/compression_cache_decorator.php";
+    require $redis_page_cache_dir . "/json_cache_decorator.php";
+    require $redis_page_cache_dir . "/minify_cache_decorator.php";
+    require $redis_page_cache_dir . "/page_cache.php";
   }
   $rps_minify = true;
   $RedisCache = new RedisCache($Redis,REDIS_PAGE_CACHE_TTL);

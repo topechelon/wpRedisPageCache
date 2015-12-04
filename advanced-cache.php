@@ -6,6 +6,10 @@ if (!defined('ABSPATH')) {
 
 if (defined('WP_INSTALLING') && WP_INSTALLING)
     return;
+
+if ($_SERVER['SCRIPT_NAME'] != '/index.php') {
+  return;
+}
 require "lib/load.php";
 $cookie_keys = array_keys($_COOKIE);
 $is_logged_in = false;
