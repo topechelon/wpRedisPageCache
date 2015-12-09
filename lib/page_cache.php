@@ -20,6 +20,13 @@ class PageCache {
     //$this->Cache->log("clear hash: $hash");
     $this->Cache->delete($hash);
   }
+  function admin_bar_menu($admin_bar) {
+    $admin_bar->add_node(array(
+                               'id' => 'redis-page-cache-purge',
+                               'title' => 'Purge Redis',
+                               'href' => wp_nonce_url(add_query_arg('redis-page-cache-purge',1),'redis-page-cache-purge')
+                               ));
+  }
   function ob_callback($content) {
     $hash = $this->getHash();
     if(!is_user_logged_in()) {
@@ -41,6 +48,15 @@ class PageCache {
       return true;
     }
     return false;
+  }
+  function clear_all() {
+    if(!empty($_GET['redis-page-cache-purge']) && check_admin_referer('redis-page-cache-purge')) {
+      $this->Cache->flushdb();
+      //$this->Cache->log("all cleared");
+      add_action( 'admin_notices' , function () {
+        echo "<div class='updated notice is-dismissible'><p>Redis Page Cache Purged</p></div>";
+      } );
+    }
   }
   protected function processHeaders($headers) {
     if(count($headers) > 0) {

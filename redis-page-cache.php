@@ -20,6 +20,8 @@ if(empty($RedisPageCache)) {
 }
 if($is_redis_connected && is_admin()) {
   add_action("save_post",array($RedisPageCache,"clear_post"));
+  add_action('admin_bar_menu',array($RedisPageCache,"admin_bar_menu"),100);
+  add_action('admin_init',array($RedisPageCache,"clear_all"));
 }
 \register_activation_hook(__FILE__,function() {
   $target = WP_CONTENT_DIR . "/plugins/redis-page-cache/advanced-cache.php";

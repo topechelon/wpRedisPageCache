@@ -16,4 +16,7 @@ abstract class CacheDecorator extends Cache {
   function delete($key) {
     return $this->Cache->delete($key);
   }
+  function flushdb() {
+    return $this->Cache->flushdb();
+  }
 }

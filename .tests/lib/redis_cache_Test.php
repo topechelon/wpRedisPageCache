@@ -26,5 +26,13 @@ class RedisCacheTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals($rc,1);
     $has = $this->RedisCache->has($hash);
     $this->assertFalse($has);
+    $rc = $this->RedisCache->set($hash,$stuff);
+    $this->assertTrue($rc);
+    $has = $this->RedisCache->has($hash);
+    $this->assertTrue($has);
+    $rc = $this->RedisCache->flushdb();
+    $this->assertEquals($rc,1);
+    $has = $this->RedisCache->has($hash);
+    $this->assertFalse($has);
   }
 }

@@ -10,7 +10,7 @@ class CacheDecoratorTest extends \PHPUnit_Framework_TestCase {
     $this->value = '5678';
     $this->MockCache = $this->getMockBuilder('\RedisPageCache\RedisCache')
                                   ->disableOriginalConstructor()
-                                  ->setMethods(array("set","get","has","delete"))
+                                  ->setMethods(array("set","get","has","delete","flushdb"))
                                   ->getMock();
     $this->Decorator = new MockCacheDecorator($this->MockCache);
   }
@@ -48,6 +48,13 @@ class CacheDecoratorTest extends \PHPUnit_Framework_TestCase {
                      ->will($this->ReturnValue(1))
                      ->with($this->equalTo($this->key));
     $return = $this->Decorator->delete($this->key);
+    $this->assertEquals($return,1);
+  }
+  function testFlushdb() {
+    $this->MockCache->expects($this->once())
+                     ->method('flushdb')
+                     ->will($this->ReturnValue(1));
+    $return = $this->Decorator->flushdb();
     $this->assertEquals($return,1);
   }
 }

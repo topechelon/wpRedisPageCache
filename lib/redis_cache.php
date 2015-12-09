@@ -20,4 +20,7 @@ class RedisCache extends Cache {
   function delete($key) {
     return $this->Redis->delete($key);
   }
+  function flushdb() {
+    return $this->Redis->flushdb();
+  }
 }
