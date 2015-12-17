@@ -69,7 +69,7 @@ class PageCache {
     }
     foreach($listofurls as $url) {
       $hash = sha1(str_replace(array("http://","https://"),"",$url));
-      //$this->Cache->log("clear hash: $hash");
+      $this->log("clear hash: $hash");
       $this->Cache->delete($hash);
     }
   }
@@ -83,7 +83,7 @@ class PageCache {
   function ob_callback($content) {
     $hash = $this->getHash();
     if(!is_user_logged_in()) {
-      //$this->Cache->log("set hash: $hash");
+      $this->log("set hash: $hash");
       $response_headers = headers_list();
       $save = array("headers" => $response_headers,
                     "content" => $content);
@@ -94,7 +94,7 @@ class PageCache {
   function check_cache() {
     $hash = $this->getHash();
     if($this->Cache->has($hash)) {
-      //$this->Cache->log("found hash: $hash");
+      $this->log("found hash: $hash");
       $cache = $this->Cache->get($hash);
       $this->processHeaders($cache['headers']);
       echo $cache['content'];
@@ -105,7 +105,7 @@ class PageCache {
   function clear_all() {
     if(!empty($_GET['redis-page-cache-purge']) && check_admin_referer('redis-page-cache-purge')) {
       $this->Cache->flushdb();
-      //$this->Cache->log("all cleared");
+      $this->log("all cleared");
       add_action( 'admin_notices' , function () {
         echo "<div class='updated notice is-dismissible'><p>Redis Page Cache Purged</p></div>";
       } );
@@ -117,5 +117,8 @@ class PageCache {
         header($header);
       }
     }
+  }
+  protected function log($info) {
+    //$this->Cache->log($info);
   }
 }
