@@ -82,11 +82,11 @@ class PageCache {
   }
   function ob_callback($content) {
     $hash = $this->getHash();
-    if(!is_user_logged_in()) {
-      $this->log("set hash: $hash");
+    if(!is_user_logged_in() && !empty($content)) {
       $response_headers = headers_list();
       $save = array("headers" => $response_headers,
                     "content" => $content);
+      $this->log("set hash: $hash");
       $this->Cache->set($hash,$save);
     }
     return $content;
@@ -104,8 +104,8 @@ class PageCache {
   }
   function clear_all() {
     if(!empty($_GET['redis-page-cache-purge']) && check_admin_referer('redis-page-cache-purge')) {
-      $this->Cache->flushdb();
       $this->log("all cleared");
+      $this->Cache->flushdb();
       add_action( 'admin_notices' , function () {
         echo "<div class='updated notice is-dismissible'><p>Redis Page Cache Purged</p></div>";
       } );
