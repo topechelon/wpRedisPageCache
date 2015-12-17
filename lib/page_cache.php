@@ -117,6 +117,7 @@ class PageCache {
         header($header);
       }
     }
+    header("X-Redis-Page-Cache: " . date("D, d M Y H:i:s e"));
   }
   protected function log($info) {
     //$this->Cache->log($info);
