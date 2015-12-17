@@ -14,11 +14,64 @@ class PageCache {
   function start_capture() {
     ob_start(array($this,"ob_callback"));
   }
-  function clear_post($post_id) {
-    $url = get_permalink($post_id);
-    $hash = sha1(str_replace(array("http://","https://"),"",$url));
-    //$this->Cache->log("clear hash: $hash");
-    $this->Cache->delete($hash);
+  function clear_post($postId) {
+	  // listofurls from varnish-http-purge plugin
+    $listofurls = array();
+	  // Category purge based on Donnacha's work in WP Super Cache
+    $categories = get_the_category($postId);
+    if ( $categories ) {
+      foreach ($categories as $cat) {
+        array_push($listofurls, get_category_link( $cat->term_id ) );
+      }
+    }
+    // Tag purge based on Donnacha's work in WP Super Cache
+    $tags = get_the_tags($postId);
+    if ( $tags ) {
+      foreach ($tags as $tag) {
+        array_push($listofurls, get_tag_link( $tag->term_id ) );
+      }
+    }
+
+    // Author URL
+    $post_author = get_post_field( 'post_author', $postId );
+    array_push($listofurls,
+      get_author_posts_url( $post_author ),
+      get_author_feed_link( $post_author )
+    );
+
+    // Archives and their feeds
+    $archiveurls = array();
+    $post_type = get_post_type( $postId );
+    if ( get_post_type_archive_link( $post_type ) == true ) {
+      array_push($listofurls,
+        get_post_type_archive_link( $post_type ),
+        get_post_type_archive_feed_link( $post_type )
+      );
+    }
+
+    // Post URL
+    array_push($listofurls, get_permalink($postId) );
+
+    // Feeds
+    array_push($listofurls,
+      get_bloginfo_rss('rdf_url') ,
+      get_bloginfo_rss('rss_url') ,
+      get_bloginfo_rss('rss2_url'),
+      get_bloginfo_rss('atom_url'),
+      get_bloginfo_rss('comments_rss2_url'),
+      get_post_comments_feed_link($postId)
+    );
+
+    // Home Page and (if used) posts page
+    array_push($listofurls, home_url('/') );
+    if ( get_option('show_on_front') == 'page' ) {
+      array_push($listofurls, get_permalink( get_option('page_for_posts') ) );
+    }
+    foreach($listofurls as $url) {
+      $hash = sha1(str_replace(array("http://","https://"),"",$url));
+      //$this->Cache->log("clear hash: $hash");
+      $this->Cache->delete($hash);
+    }
   }
   function admin_bar_menu($admin_bar) {
     $admin_bar->add_node(array(
