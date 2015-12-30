@@ -27,7 +27,7 @@ if($is_redis_connected) {
     require $redis_page_cache_dir . "/minify_cache_decorator.php";
     require $redis_page_cache_dir . "/page_cache.php";
   }
-  $rps_minify = true;
+  $rps_minify = false;
   $RedisCache = new RedisCache($Redis,REDIS_PAGE_CACHE_TTL);
   $RedisCache = new CompressionCacheDecorator($RedisCache);
   $RedisCache = new JsonCacheDecorator($RedisCache);
