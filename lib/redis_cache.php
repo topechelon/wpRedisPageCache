@@ -15,7 +15,11 @@ class RedisCache extends Cache {
     return $value;
   }
   function set($key,$value) {
-    return $this->Redis->setEx($key,$this->ttl,$value);
+    if(empty($this->ttl)) {
+      return $this->Redis->set($key,$value);
+    } else {
+      return $this->Redis->setEx($key,$this->ttl,$value);
+    }
   }
   function delete($key) {
     return $this->Redis->delete($key);
