@@ -1,9 +1,9 @@
 <?php
 namespace RedisPageCache;
 /*
-Plugin Name: Redis Page Cache
+Plugin Name: PSI Redis Page Cache
 Description: Redis-backed Page Cache
-Version: 0.7
+Version: 0.8
 Plugin URI: 
 Author: Michael McHolm
 Author URI: 
