@@ -20,7 +20,7 @@ foreach($cookie_keys as $cookie_key) {
   }
 }
 if($is_redis_connected && !$is_logged_in) {
-  $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+  $uri = $_SERVER['REQUEST_METHOD'] . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
   $hash = sha1($uri);
   $RedisPageCache->setHash($hash);
   if($RedisPageCache->check_cache()) {
