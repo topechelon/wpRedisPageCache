@@ -19,6 +19,15 @@ foreach($cookie_keys as $cookie_key) {
     break;
   }
 }
+if(defined('REDIS_PAGE_CACHE_SKIP_URLS')) {
+  $skip_urls = preg_split('/,/',REDIS_PAGE_CACHE_SKIP_URLS);
+  foreach($skip_urls as $skip_url) {
+    if(strpos($_SERVER['REQUEST_URI'],$skip_url) === 0) {
+      return;
+    }
+  }
+}
+
 if($is_redis_connected && !$is_logged_in) {
   $uri = $_SERVER['REQUEST_METHOD'] . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
   $hash = sha1($uri);
