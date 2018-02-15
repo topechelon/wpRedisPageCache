@@ -82,7 +82,8 @@ class PageCache {
   }
   function ob_callback($content) {
     $hash = $this->getHash();
-    if(!is_user_logged_in() && !empty($content)) {
+    $response_code = http_response_code();
+    if(!is_user_logged_in() && !empty($content) && $response_code >= 200 && $response_code < 300) {
       $response_headers = headers_list();
       $save = array("headers" => $response_headers,
                     "content" => $content);
