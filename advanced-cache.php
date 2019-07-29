@@ -30,6 +30,9 @@ if(defined('REDIS_PAGE_CACHE_SKIP_URLS')) {
 
 if($is_redis_connected && !$is_logged_in) {
   $uri = $_SERVER['REQUEST_METHOD'] . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+  if(strpos($_SERVER['REQUEST_URI'],"/wp-json/wp/v2/") === 0) {
+    return;
+  }
   $hash = sha1($uri);
   $RedisPageCache->setHash($hash);
   if($RedisPageCache->check_cache()) {
