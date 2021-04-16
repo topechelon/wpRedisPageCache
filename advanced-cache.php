@@ -20,7 +20,7 @@ foreach($cookie_keys as $cookie_key) {
   }
 }
 
-if($is_redis_connected && !$is_logged_in) {
+if($is_redis_connected && !$is_logged_in && $_SERVER['REQUEST_METHOD'] == 'GET') {
   if(defined('REDIS_PAGE_CACHE_SKIP_URLS')) {
     $skip_urls = preg_split('/,/',REDIS_PAGE_CACHE_SKIP_URLS);
     foreach($skip_urls as $skip_url) {
