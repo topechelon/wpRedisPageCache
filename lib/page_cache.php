@@ -5,6 +5,10 @@ class PageCache {
   function __construct($Cache) {
     $this->Cache = $Cache;
   }
+  function setUriHash() {
+    $this->uri = $_SERVER['REQUEST_METHOD'] . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $this->setHash(sha1($this->uri));
+  }
   function setHash($hash) {
     $this->hash = $hash;
   }
@@ -80,14 +84,24 @@ class PageCache {
                                'href' => wp_nonce_url(add_query_arg('redis-page-cache-purge',1),'redis-page-cache-purge')
                                ));
   }
+  function isUserLoggedIn() {
+    $cookie_keys = array_keys($_COOKIE);
+    foreach($cookie_keys as $cookie_key) {
+      if(preg_match("/^wordpress_logged_in_/",$cookie_key) > 0) {
+        return true;
+        break;
+      }
+    }
+    return false;
+  }
   function ob_callback($content) {
     $hash = $this->getHash();
     $response_code = http_response_code();
-    if(!is_user_logged_in() && !empty($content) && $response_code >= 200 && $response_code < 300) {
+    if(!$this->isUserLoggedIn() && !empty($content) && $response_code >= 200 && $response_code < 300) {
       $response_headers = headers_list();
       $save = array("headers" => $response_headers,
                     "content" => $content);
-      $this->log("set hash: $hash");
+      $this->log("set hash: $hash ($this->uri)");
       $this->Cache->set($hash,$save);
     }
     return $content;
@@ -95,8 +109,12 @@ class PageCache {
   function check_cache() {
     $hash = $this->getHash();
     if($this->Cache->has($hash)) {
-      $this->log("found hash: $hash");
+      $this->log("found hash: $hash ($this->uri)");
       $cache = $this->Cache->get($hash);
+      if(strlen(trim($cache['content'])) == 0) {
+        $this->log("found empty");
+        return false;
+      }
       $this->processHeaders($cache['headers']);
       echo $cache['content'];
       return true;
@@ -113,7 +131,7 @@ class PageCache {
     }
   }
   protected function processHeaders($headers) {
-    if(count($headers) > 0) {
+    if(isset($headers) && count($headers) > 0) {
       foreach ($headers as $header){
         header($header);
       }

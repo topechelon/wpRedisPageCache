@@ -11,16 +11,8 @@ if ($_SERVER['SCRIPT_NAME'] != '/index.php') {
   return;
 }
 require "lib/load.php";
-$cookie_keys = array_keys($_COOKIE);
-$is_logged_in = false;
-foreach($cookie_keys as $cookie_key) {
-  if(preg_match("/^wordpress_logged_in_/",$cookie_key) > 0) {
-    $is_logged_in = true;
-    break;
-  }
-}
 
-if($is_redis_connected && !$is_logged_in && $_SERVER['REQUEST_METHOD'] == 'GET') {
+if($is_redis_connected && !$RedisPageCache->isUserLoggedIn() && $_SERVER['REQUEST_METHOD'] == 'GET') {
   if(defined('REDIS_PAGE_CACHE_SKIP_URLS')) {
     $skip_urls = preg_split('/,/',REDIS_PAGE_CACHE_SKIP_URLS);
     foreach($skip_urls as $skip_url) {
@@ -29,9 +21,7 @@ if($is_redis_connected && !$is_logged_in && $_SERVER['REQUEST_METHOD'] == 'GET')
       }
     }
   }
-  $uri = $_SERVER['REQUEST_METHOD'] . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-  $hash = sha1($uri);
-  $RedisPageCache->setHash($hash);
+  $RedisPageCache->setUriHash();
   if($RedisPageCache->check_cache()) {
     exit;
   } else {
